@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sugerencias - MineMarket</title>
+    <!-- Tailwind CSS para un diseño moderno -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 text-slate-100 flex items-center justify-center min-h-screen">
+
+    <div class="bg-slate-800 p-8 rounded-xl shadow-xl w-full max-w-lg border border-slate-700">
+        <h1 class="text-2xl font-bold mb-6 text-emerald-400 text-center">Buzón de Sugerencias</h1>
+        
+        <form id="suggestionForm" class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium mb-1">Tu Nombre de Usuario o Discord</label>
+                <input type="text" id="username" required class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 focus:outline-none focus:border-emerald-500" placeholder="Ej. TuNombre#0001">
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium mb-1">Categoría</label>
+                <select id="category" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 focus:outline-none focus:border-emerald-500">
+                    <option value="General">General</option>
+                    <option value="Configuraciones">Configuraciones</option>
+                    <option value="Traducciones">Traducciones</option>
+                    <option value="Página Web">Página Web</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium mb-1">Tu Sugerencia</label>
+                <textarea id="message" rows="4" required class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 focus:outline-none focus:border-emerald-500" placeholder="Escribe detalladamente tu idea..."></textarea>
+            </div>
+
+            <button type="submit" id="submitBtn" class="w-full bg-emerald-600 hover:bg-emerald-500 font-semibold py-2.5 rounded-lg transition-colors">
+                Enviar Sugerencia
+            </button>
+        </form>
+
+        <p id="status" class="text-center text-sm mt-4 hidden"></p>
+    </div>
+
+    <script>
+        const form = document.getElementById('suggestionForm');
+        const statusText = document.getElementById('status');
+        const submitBtn = document.getElementById('submitBtn');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Webhook configurado automáticamente
+            const WEBHOOK_URL = 'https://discord.com/api/webhooks/1550624999881314435/nduEQgFzA6R7FlxzE6h_pwr1acCfs0z7PfQwBc-nPWID4WksY3kNjdi1UBCLZWf339Eu';
+
+            const username = document.getElementById('username').value;
+            const category = document.getElementById('category').value;
+            const message = document.getElementById('message').value;
+
+            const payload = {
+                embeds: [{
+                    title: "💡 Nueva Sugerencia Recibida",
+                    color: 3066993, // Color esmeralda
+                    fields: [
+                        { name: "👤 Autor", value: username, inline: true },
+                        { name: "📁 Categoría", value: category, inline: true },
+                        { name: "💬 Sugerencia", value: message, inline: false }
+                    ],
+                    timestamp: new Date().toISOString()
+                }]
+            };
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = "Enviando...";
+
+            try {
+                const response = await fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (response.ok) {
+                    statusText.textContent = "¡Sugerencia enviada con éxito a Discord!";
+                    statusText.className = "text-center text-sm mt-4 text-emerald-400";
+                    statusText.classList.remove('hidden');
+                    form.reset();
+                } else {
+                    throw new Error('Error al enviar a Discord');
+                }
+            } catch (error) {
+                statusText.textContent = "Hubo un error al enviar la sugerencia. Inténtalo de nuevo.";
+                statusText.className = "text-center text-sm mt-4 text-red-400";
+                statusText.classList.remove('hidden');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = "Enviar Sugerencia";
+            }
+        });
+    </script>
+</body>
+</html>
